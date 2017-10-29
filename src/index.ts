@@ -10,9 +10,7 @@ const readFile = promisify(fs.readFile);
 const glob = promisify(multiGlob.glob);
 
 function usage() {
-  return `CSSlusterfuck
-  Usage: csslusterfuck /path/to/style.scss
-  `;
+  return `Usage: csslusterfuck /path/to/style.scss`;
 }
 
 //
@@ -137,12 +135,13 @@ function analyzeRules(rules: RuleWithFilename[]): VectorWeight[] {
   })
 
   // We should connect these to the relevant css rule
+  const len = rules.length;
   const weights = vectors
     .filter(rules => !!rules)
     // Normalize vectors
     .map(vector => ({
       ...vector,
-      weight: Math.sqrt(vector!.vector.reduce((a, b) => a + b * b, 0))
+      weight: Math.sqrt(vector!.vector.reduce((a, b) => a + b * b, 0)) / len,
     } as VectorWeight));
 
   const sorted = sortBy(weights, (vector: VectorWeight) => -vector.weight);
@@ -156,7 +155,8 @@ function isRule(node: postcss.Node): node is postcss.Rule {
 }
 
 function getLineNumber(rule: postcss.Rule) {
-  return `${rule.source.start!.line}:${rule.source.start!.column}-${rule.source.end!.line}:${rule.source.end!.column}`;
+  // return `${rule.source.start!.line}:${rule.source.start!.column}-${rule.source.end!.line}:${rule.source.end!.column}`;
+  return `${rule.source.start!.line}:${rule.source.start!.column}`;
 }
 
 
@@ -175,10 +175,20 @@ async function csslusterfuck(filenames: string[]) {
   // console.log('Rules', ...rules);
   const analysis = analyzeRules(rules);
 
+  if (analysis.length > 0)
+    console.log('I might have found some obnoxious CSS rules:\n');
+
   analysis.slice(0, 10).forEach((vector) => {
     const rule: postcss.Rule = vector.rule;
-    console.log(`(${Math.round(vector.weight)}) ${vector.filename}#${getLineNumber(rule)} '${rule.selector}'`);
+    console.log(`${vector.filename}#${getLineNumber(rule)} (${vector.weight})`);
+    // TODO: Eliminate rule children
+    console.log(rule.toString());
   });
+}
+
+if (process.argv.length < 3) {
+  console.log(usage());
+  process.exit();
 }
 
 glob(process.argv[2])

@@ -4,7 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "csslusterfuck": "node ./bin/csslusterfuck",
+    "csslusterfuck:dev": "ts-node ./src/csslusterfuck.ts",
+    "cp:bin": "bash -c \"mkdir -p ./bin && cp ./lib/csslusterfuck.bin.js ./bin/csslusterfuck\"",
+    "build:tsc": "tsc",
+    "build": "npm run build:tsc && npm run cp:bin",
+    "clean": "bash -c \"rm -r ./bin ./lib\""
   },
   "keywords": [],
   "author": "",
@@ -12,6 +18,8 @@
   "devDependencies": {
     "@types/lodash": "^4.14.80",
     "@types/node": "^8.0.47",
+    "fs-dot": "^4.0.2",
+    "npm-runtools": "^1.0.1",
     "sass-lint": "^1.12.1",
     "ts-node": "^3.3.0",
     "tslint": "^5.8.0",
