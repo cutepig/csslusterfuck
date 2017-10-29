@@ -99,10 +99,13 @@ type VectorWeight = {
   vector: number[];
   rule: postcss.Rule;
   weight: number;
+  filename: string;
 }
 
-function analyzeRules(rules: postcss.Rule[]): VectorWeight[] {
-  const matrix = _createMatrix(rules);
+type RuleWithFilename = [string, postcss.Rule];
+
+function analyzeRules(rules: RuleWithFilename[]): VectorWeight[] {
+  const matrix = _createMatrix(map(rules, ([_, rule]) => rule));
   // Not sure if I even need to sort these..
   // const sorted = _sortMatrix(matrix);
   // ...Just go over the rules again, check it's values against the matrix
@@ -113,7 +116,7 @@ function analyzeRules(rules: postcss.Rule[]): VectorWeight[] {
   // Now we would have the enhance the decl vector by trying different permutations
   // And we would have to test the rules against other rules to show what are the
   // similar blocks, showing those rules with the set of properties used
-  const vectors = rules.map(rule => {
+  const vectors = rules.map(([filename, rule]) => {
     if (!rule.nodes)
       return;
 
@@ -130,7 +133,7 @@ function analyzeRules(rules: postcss.Rule[]): VectorWeight[] {
       }
     }
 
-    return {vector, rule};
+    return {vector, rule, filename};
   })
 
   // We should connect these to the relevant css rule
@@ -155,25 +158,27 @@ function isRule(node: postcss.Node): node is postcss.Rule {
 function getLineNumber(rule: postcss.Rule) {
   return `${rule.source.start!.line}:${rule.source.start!.column}-${rule.source.end!.line}:${rule.source.end!.column}`;
 }
-async function csslusterfuckFile(filename: string): Promise<any> {
+
+
+async function readRules(filename: string): Promise<RuleWithFilename[]> {
   const data = await readFile(filename);
   const result = await postcss([]).process(data, {syntax});
   const rules = filterAST(isRule, result.root as postcss.Node) as postcss.Rule[];
-  // console.log('Rules', ...rules);
-  const analysis = analyzeRules(rules);
-  console.log(`The most offensive blocks in '${filename}':`);
-
-  analysis.slice(0, 10).forEach((vector) => {
-    const rule: postcss.Rule = vector.rule;
-    console.log(`(${Math.round(vector.weight)}) ${getLineNumber(rule)} '${rule.selector}'`);
-  });
+  return rules.map(rule => [filename, rule] as RuleWithFilename);
 }
 
 //
 // Entry point
-function csslusterfuck(filenames: string[]): Promise<postcss.Root[]> {
-  const promises = filenames.map(csslusterfuckFile);
-  return Promise.all(promises);
+async function csslusterfuck(filenames: string[]) {
+  const _rules = await Promise.all(filenames.map(readRules)) as [[[string, postcss.Rule]]];
+  const rules = flatMap(_rules);
+  // console.log('Rules', ...rules);
+  const analysis = analyzeRules(rules);
+
+  analysis.slice(0, 10).forEach((vector) => {
+    const rule: postcss.Rule = vector.rule;
+    console.log(`(${Math.round(vector.weight)}) ${vector.filename}#${getLineNumber(rule)} '${rule.selector}'`);
+  });
 }
 
 glob(process.argv[2])
