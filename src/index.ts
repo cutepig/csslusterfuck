@@ -1,11 +1,12 @@
 import * as fs from 'fs';
 import {promisify} from 'util';
-// import * as process from 'process';
 import * as postcss from 'postcss';
-// import * as syntax from 'postcss-scss';
+
 const syntax = require('postcss-scss');
+const multiGlob = require('multi-glob');
 
 const readFile = promisify(fs.readFile);
+const glob = promisify(multiGlob.glob);
 
 function usage() {
   return `Clusterfuck
@@ -13,16 +14,19 @@ function usage() {
   `;
 }
 
-async function clusterfuck(filename?: string): Promise<postcss.Root> {
-  if (!filename)
-    throw Error(usage());
-
-  const data = await readFile(filename)
+async function clusterfuckSingleFile(filename: string): Promise<postcss.Root> {
+  const data = await readFile(filename);
   const result = await postcss([]).process(data, {syntax});
   const root = result.root as postcss.Root;
   return root;
 }
 
-clusterfuck(process.argv[2])
-  .then(ast => console.log(ast))
-  .catch(err => console.log(err.message));
+async function clusterfuck(filenames: string[]): Promise<postcss.Root[]> {
+  const promises = filenames.map(clusterfuckSingleFile);
+  return Promise.all(promises);
+}
+
+glob(process.argv[2])
+  .then(clusterfuck)
+  .then((ast: postcss.Root[]) => console.log(ast))
+  .catch((err: Error) => console.log(err.message));

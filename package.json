@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "lodash": "^4.17.4",
+    "multi-glob": "^1.0.1",
     "postcss": "^6.0.13",
     "postcss-scss": "^1.0.2"
   }
