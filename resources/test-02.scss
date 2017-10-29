@@ -1,0 +1,12 @@
+.article {
+  @include article-base(0 0);
+
+  h1 {
+    font-size: 24px;
+    margin-bottom: 12px;
+  }
+
+  p {
+    margin-bottom: 24px;
+  }
+}
