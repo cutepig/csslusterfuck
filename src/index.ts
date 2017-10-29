@@ -95,11 +95,6 @@ function _createMatrix(rules: postcss.Rule[]): Matrix {
   return matrix;
 }
 
-function _sortMatrix(matrix: Matrix) {
-  const sortData = flatMap(matrix, (row, prop1) => map(row, (value, prop2) => [value, prop1, prop2]));
-  return sortBy(sortData, ([value]) => -value);
-}
-
 type VectorWeight = {
   vector: number[];
   rule: postcss.Rule;
@@ -114,6 +109,10 @@ function analyzeRules(rules: postcss.Rule[]): VectorWeight[] {
   // Collect decl vectors from rule, for instance [decl1, decl2, decl3]
   // Create index vectors from different permuations to get [[prop1 prop2] [prop1 prop3] [prop2 prop3]]
   // Map those into a vector of [value1 value2 value3] and compute vector length
+  // Ok this is now implemented, but what then?
+  // Now we would have the enhance the decl vector by trying different permutations
+  // And we would have to test the rules against other rules to show what are the
+  // similar blocks, showing those rules with the set of properties used
   const vectors = rules.map(rule => {
     if (!rule.nodes)
       return;
@@ -153,18 +152,21 @@ function isRule(node: postcss.Node): node is postcss.Rule {
   return node.type === 'rule';
 }
 
+function getLineNumber(rule: postcss.Rule) {
+  return `${rule.source.start!.line}:${rule.source.start!.column}-${rule.source.end!.line}:${rule.source.end!.column}`;
+}
 async function csslusterfuckFile(filename: string): Promise<any> {
   const data = await readFile(filename);
   const result = await postcss([]).process(data, {syntax});
   const rules = filterAST(isRule, result.root as postcss.Node) as postcss.Rule[];
   // console.log('Rules', ...rules);
   const analysis = analyzeRules(rules);
-  analysis.forEach((vector) => {
+  console.log(`The most offensive blocks in '${filename}':`);
+
+  analysis.slice(0, 10).forEach((vector) => {
     const rule: postcss.Rule = vector.rule;
-    console.log(`[Check] ${filename}#\
-    ${rule.source.start!.line}:${rule.source.start!.column}-${rule.source.end!.line}:${rule.source.end!.column} \
-    '${rule.selector}'`);
-  })
+    console.log(`(${Math.round(vector.weight)}) ${getLineNumber(rule)} '${rule.selector}'`);
+  });
 }
 
 //
