@@ -1,0 +1,25 @@
+{
+  "name": "csslusterfuck",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/lodash": "^4.14.80",
+    "@types/node": "^8.0.47",
+    "sass-lint": "^1.12.1",
+    "ts-node": "^3.3.0",
+    "tslint": "^5.8.0",
+    "typescript": "^2.5.3"
+  },
+  "dependencies": {
+    "lodash": "^4.17.4",
+    "postcss": "^6.0.13",
+    "postcss-scss": "^1.0.2"
+  }
+}
