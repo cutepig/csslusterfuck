@@ -14,18 +14,26 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
+  "prettier": {
+    "singleQuote": true,
+    "bracketSpacing": false,
+    "semi": false,
+    "trailingComma": "es5"
+  },
   "devDependencies": {
     "@types/lodash": "^4.14.80",
     "@types/node": "^8.0.47",
     "fs-dot": "^4.0.2",
     "npm-runtools": "^1.0.1",
+    "prettier": "^1.7.4",
     "sass-lint": "^1.12.1",
     "ts-node": "^3.3.0",
     "tslint": "^5.8.0",
     "typescript": "^2.5.3"
   },
   "dependencies": {
+    "args": "^3.0.7",
     "lodash": "^4.17.4",
     "multi-glob": "^1.0.1",
     "postcss": "^6.0.13",
