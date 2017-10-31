@@ -5,12 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "csslusterfuck": "node ./bin/csslusterfuck",
-    "csslusterfuck:dev": "ts-node ./src/csslusterfuck.ts",
-    "cp:bin": "bash -c \"mkdir -p ./bin && cp ./lib/csslusterfuck.bin.js ./bin/csslusterfuck\"",
+    "csslusterfuck": "node ./lib/cli.js",
+    "csslusterfuck:dev": "ts-node ./src/cli.ts",
     "build:tsc": "tsc",
-    "build": "npm run build:tsc && npm run cp:bin",
-    "clean": "bash -c \"rm -r ./bin ./lib\""
+    "build": "npm run build:tsc",
+    "clean": "bash -c \"rm -r ./lib\""
   },
   "keywords": [],
   "author": "",

@@ -27,7 +27,7 @@ function reportSuccess(analysis, options) {
   if (analysis.length > 0)
     console.log('I might have found some obnoxious CSS rules:\n')
 
-  const count = +options.count
+  const {count} = options
   if (isNaN(options.count) || count < 1)
     throw new Error('You stupid! Count has to be a number from 1 to Infinity!')
 
@@ -40,14 +40,15 @@ function reportSuccess(analysis, options) {
 }
 
 function reportError(error) {
-  console.log(error)
+  console.error(`${error.message}\n`)
 }
 
 async function cli(filenames, options) {
-  console.log('cli', filenames, options)
+  if (!filenames.length) throw new Error(`I'm sorry, what was that again?`)
+
   const _options = {
     ...options,
-    count: options.count,
+    count: +options.count,
     n: options.n,
     filenames,
   }
