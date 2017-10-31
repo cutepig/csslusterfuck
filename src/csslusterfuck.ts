@@ -12,11 +12,11 @@ const glob = promisify(multiGlob.glob)
 args
   .option(
     'mode',
-    `I've only bothered to implement 'dumb' mode. Try that`,
+    `I've only bothered to implement 'dumb' mode. Try that.`,
     'dumb'
   )
   .option('unnormalized', 'Analyzation values will not be normalized')
-  .option(['n', 'count'], 'Number of rules to show')
+  .option(['n', 'count'], 'Number of rules to show', 10)
 
 function getLineNumber(rule: postcss.Rule) {
   // `rule.source.end` is also available to denote endpoint

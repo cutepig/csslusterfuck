@@ -25,6 +25,7 @@ async function csslusterfuck(sources: string[], options: CsslusterfuckOptions) {
   const _options = defaults({}, options, {
     filenames: sources.map((_, n) => `<source #${n}>`),
     unnormalized: false,
+    count: 10,
   })
   const asts = await Promise.all<postcss.Node>(
     sources.map((source, n) => parseSingleSource(source, _options.filenames[n]))
