@@ -20,7 +20,7 @@
   "prettier": {
     "singleQuote": true,
     "bracketSpacing": false,
-    "semi": false,
+    "semi": true,
     "trailingComma": "es5"
   },
   "devDependencies": {

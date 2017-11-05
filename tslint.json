@@ -1,28 +1,31 @@
 {
-    "defaultSeverity": "error",
-    "extends": [
-        "tslint:recommended"
+  "defaultSeverity": "error",
+  "extends": ["tslint:recommended"],
+  "jsRules": {},
+  "rules": {
+    "arrow-parens": [true, "ban-single-arg-parens"],
+    "curly": [true, "ignore-same-line"],
+    "interface-name": false,
+    "quotemark": [true, "single", "jsx-double", "avoid-escape"],
+    "semicolon": true,
+    "trailing-comma": [
+      true,
+      {
+        "multiline": {
+          "objects": "always",
+          "arrays": "always",
+          "functions": "never",
+          "typeLiterals": "ignore"
+        },
+        "esSpecCompliant": true
+      }
     ],
-    "jsRules": {},
-    "rules": {
-        "arrow-parens": [true, "ban-single-arg-parens"],
-        "curly": [true, "as-needed"],
-        "interface-name": false,
-        "quotemark": [true, "single", "jsx-double", "avoid-escape"],
-        "semicolon": [true, "never"],
-        "trailing-comma": [
-            true,
-            {
-                "multiline": {
-                "objects": "always",
-                "arrays": "always",
-                "functions": "never",
-                "typeLiterals": "ignore"
-                },
-                "esSpecCompliant": true
-            }
-        ],
-        "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"]
-    },
-    "rulesDirectory": []
+    "variable-name": [
+      true,
+      "ban-keywords",
+      "check-format",
+      "allow-leading-underscore"
+    ]
+  },
+  "rulesDirectory": []
 }
