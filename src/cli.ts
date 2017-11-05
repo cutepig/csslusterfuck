@@ -1,73 +1,80 @@
 /* tslint:disable no-console */
-import * as args from 'args'
-import * as fs from 'fs'
-import * as multiGlob from 'multi-glob'
-import * as postcss from 'postcss'
-import {promisify} from 'util'
-import csslusterfuck from './index'
+import * as args from 'args';
+import * as fs from 'fs';
+import * as multiGlob from 'multi-glob';
+import {promisify} from 'util';
+import dumbAnalyzer from './analyzers/dumbAnalyzer';
+import dumbCrossAnalyzer from './analyzers/dumbCrossAnalyzer';
+import csslusterfuck from './index';
+import dumbCrossReporter from './reporters/dumbCrossReporter';
+import dumbReporter from './reporters/dumbReporter';
 
-const readFile = promisify(fs.readFile)
-const glob = promisify(multiGlob.glob)
+const readFile = promisify(fs.readFile);
+const glob = promisify(multiGlob.glob);
 
 args
   .option(
     'mode',
-    `I've only bothered to implement 'dumb' mode. Try that.`,
+    `I've only bothered to implement 'dumb' and 'dumb-cross' modes. Try those.`,
     'dumb'
   )
   .option('unnormalized', 'Analyzation values will not be normalized')
-  .option(['n', 'count'], 'Number of rules to show', 10)
+  .option(['n', 'count'], 'Number of rules to show', 10);
 
-function getLineNumber(rule: postcss.Rule) {
-  // `rule.source.end` is also available to denote endpoint
-  return `${rule.source.start!.line}:${rule.source.start!.column}`
+function errorReporter(error) {
+  console.error(`${error.message}\n`, error.stack);
 }
 
-function reportSuccess(analysis, options) {
-  if (analysis.length > 0)
-    console.log('I might have found some obnoxious CSS rules:\n')
+type AnalyzerType = 'dumb' | 'dumb-cross';
 
-  const {count} = options
-  if (isNaN(options.count) || count < 1)
-    throw new Error('You stupid! Count has to be a number from 1 to Infinity!')
-
-  analysis.slice(0, +options.count).forEach(vector => {
-    const rule: postcss.Rule = vector.rule
-    console.log(`${vector.filename}#${getLineNumber(rule)} (${vector.weight})`)
-    // TODO: Eliminate rule children
-    console.log(rule.toString())
-  })
+function getAnalyzer(mode: AnalyzerType) {
+  switch (mode) {
+    case 'dumb':
+      return dumbAnalyzer;
+    case 'dumb-cross':
+      return dumbCrossAnalyzer;
+    default:
+      return dumbAnalyzer;
+  }
 }
 
-function reportError(error) {
-  console.error(`${error.message}\n`)
+function getReporter(mode: AnalyzerType) {
+  switch (mode) {
+    case 'dumb':
+      return dumbReporter;
+    case 'dumb-cross':
+      return dumbCrossReporter;
+    default:
+      return dumbReporter;
+  }
 }
 
 async function cli(filenames, options) {
-  if (!filenames.length) throw new Error(`I'm sorry, what was that again?`)
+  if (!filenames.length) throw new Error(`I'm sorry, what was that again?`);
 
   const _options = {
-    ...options,
+    unnormalized: Boolean(options.unnormalized),
     count: +options.count,
-    n: options.n,
+    analyzer: getAnalyzer(options.mode),
     filenames,
-  }
+  };
 
   const sources = await Promise.all<string>(
     filenames.map(filename => readFile(filename))
-  )
-  const result = csslusterfuck(sources, _options)
-  return result
+  );
+  const analysis = await csslusterfuck(sources, _options);
+  const reporter = getReporter(options.mode);
+
+  return reporter(analysis, _options);
 }
 
-const argv = args.parse(process.argv, {name: 'csslusterfuck'})
+const argv = args.parse(process.argv, {name: 'csslusterfuck'});
 
 if (!args.raw._.length) {
-  args.showHelp()
-  process.exit()
+  args.showHelp();
+  process.exit();
 }
 
 glob(args.raw._)
   .then(filenames => cli(filenames, argv))
-  .then(data => reportSuccess(data, argv))
-  .catch(reportError)
+  .catch(errorReporter);
